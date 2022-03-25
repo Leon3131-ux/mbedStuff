@@ -5,11 +5,12 @@
 #include <string>
 #include <math.h>
 #include <LSM6DSLSensor.h>
-
+#include "http_request.h"
 
 OLEDDisplay oled( MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL );
 DevI2C devI2c( MBED_CONF_IOTKIT_I2C_SDA, MBED_CONF_IOTKIT_I2C_SCL );
 HTS221Sensor tempSensor(&devI2c);
+DigitalIn button1( BUTTON1 );
 
 static LSM6DSLSensor acc_gyro( &devI2c, LSM6DSL_ACC_GYRO_I2C_ADDRESS_LOW ); // low address
 uint16_t tap_count = 0;
@@ -21,6 +22,9 @@ int main()
 
     float temp;
     float hum;
+    int button_count;
+    char body[1024];
+
 
     uint8_t id;
     LSM6DSL_Event_Status_t status;
@@ -34,6 +38,25 @@ int main()
 
     acc_gyro.read_id(&id);
 
+    WiFiInterface* network = WiFiInterface::get_default_instance();
+    if (!network) {
+        printf("ERROR: No WiFiInterface found.\n");
+        return -1;
+    }
+
+    printf("\nConnecting to %s...\n", MBED_CONF_APP_WIFI_SSID);
+    int ret = network->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
+    if (ret != 0) {
+        printf("\nConnection error: %d\n", ret);
+        return -1;
+    }
+
+    printf("Success\n\n");
+    printf("MAC: %s\n", network->get_mac_address());
+    SocketAddress a;
+    network->get_ip_address(&a);
+    printf("IP: %s\n", a.get_ip_address());
+
     while (true) {
 
         tempSensor.get_temperature(&temp);
@@ -43,35 +66,24 @@ int main()
         if  ( status.TapStatus ) {
             tap_count++;
             oled.cursor( 1, 0 );
-            oled.printf( "tap %6d\n", tap_count );
             printf( "tap %6d\n", tap_count );
         }
         thread_sleep_for( 100 );
 
+        
+        if  ( button1 == 0 ) 
+        {
+            button_count++;
+            printf( "BTN %6d\n", button_count );
+        }
+    
+        HttpRequest* post_req = new HttpRequest( network, HTTP_POST, "http://<wo-hin>");
+
+        sprintf( body, "{ \"TEMP\": %f \"HUM\": %f \"BEATC\": %i \"BTNC\": %i}", temp, hum, tap_count, button_count);
+        HttpResponse* post_res = post_req->send(body, strlen(body));
+
         oled.clear();
-        oled.printf("current temp: %.2f\ncurrent hum: %.2f\nCurrent tap: %i", temp, hum, tap_count);
+        oled.printf("current temp: %.2f\ncurrent hum: %.2f\nCurrent tap: %i\nCurrent btn count: %i", temp, hum, tap_count, button_count);
     }
-
-    // Connect to the network with the default networking interface
-    // if you use WiFi: see mbed_app.json for the credentials
-    // WiFiInterface* network = WiFiInterface::get_default_instance();
-    // if (!network) {
-    //     printf("ERROR: No WiFiInterface found.\n");
-    //     return -1;
-    // }
-
-    // printf("\nConnecting to %s...\n", MBED_CONF_APP_WIFI_SSID);
-    // int ret = network->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD, NSAPI_SECURITY_WPA_WPA2);
-    // if (ret != 0) {
-    //     printf("\nConnection error: %d\n", ret);
-    //     return -1;
-    // }
-    // printf("Success\n\n");
-    // printf("MAC: %s\n", network->get_mac_address());
-    // SocketAddress a;
-    // network->get_ip_address(&a);
-    // printf("IP: %s\n", a.get_ip_address());
-
-
 }
 

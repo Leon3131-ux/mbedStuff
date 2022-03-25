@@ -7,3 +7,5 @@ BUILD
 
 iotkit
 HTS221
+LSM6DSL
+mbed-http
