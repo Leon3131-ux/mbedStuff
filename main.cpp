@@ -22,8 +22,8 @@ int main()
 
     float temp;
     float hum;
-    int button_count;
-    char body[1024];
+    int button_count = 0;
+    char body[2048];
 
 
     uint8_t id;
@@ -79,12 +79,12 @@ int main()
         
         HttpRequest* post_req = new HttpRequest( network, HTTP_POST, "http://164.92.173.232:23552/api/sensor/data");
         post_req->set_header("content-type", "application/json");
-        // sprintf( body, "{ \"TEMP\": %f \"HUM\": %f \"BEATC\": %i \"BTNC\": %i}", temp, hum, tap_count, button_count);
         sprintf( body, "[{\"type\": \"TEMP\", \"value\": \"%f\"}, {\"type\": \"HUM\", \"value\": \"%f\"}, {\"type\": \"BEATC\", \"value\": \"%i\"}, {\"type\": \"BTNC\", \"value\": \"%i\"}]", temp, hum, tap_count, button_count);
 
-        // sprintf( body, "{\"TEMP\": %f, \"HUM\": %f, \"BEATC\": %i, \"BTNC\": %i}", temp, hum, tap_count, button_count);
         thread_sleep_for( 1000 );
         HttpResponse* post_res = post_req->send(body, strlen(body));
+        delete post_req;
+
 
         oled.clear();
         oled.printf("current temp: %.2f\ncurrent hum: %.2f\nCurrent tap: %i\nCurrent btn count: %i", temp, hum, tap_count, button_count);
