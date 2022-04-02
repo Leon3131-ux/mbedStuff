@@ -63,33 +63,22 @@ int main()
     network->get_ip_address(&a);
     printf("IP: %s\n", a.get_ip_address());
 
-    while   ( 1 ) 
-    {
-        // RFID Reader
-        if ( rfidReader.PICC_IsNewCardPresent())
-            if ( rfidReader.PICC_ReadCardSerial()) 
-            {
-                HttpRequest* post_req_rfid = new HttpRequest( network, HTTP_POST, "http://164.92.173.232:23552/api/sensor/data");
-                oled.cursor( 1, 0 );                
-                // Print Card UID (2-stellig mit Vornullen, Hexadecimal)
-                oled.printf("UID: ");
-                for ( int i = 0; i < rfidReader.uid.size; i++ )
-                    printf("%02X:", rfidReader.uid.uidByte[i]);
-                oled.printf("\r\n");
-                // Print Card type
-                int piccType = rfidReader.PICC_GetType(rfidReader.uid.sak);
-                post_req_rfid->set_header("content-type", "application/json");
-                sprintf( body, "[{\"type\": \"RFID\", \"value\": \"%%02X:%02X:%02X:%02X\"}]", rfidReader.uid.uidByte[0], rfidReader.uid.uidByte[1], rfidReader.uid.uidByte[2], rfidReader.uid.uidByte[3]);
-                HttpResponse* post_req_rfid = post_req_rfid->send(body, strlen(body));
-                delete post_req_rfid;
-            }
-        thread_sleep_for( 200 );
-    }
-
     while (true) {
 
         tempSensor.get_temperature(&temp);
         tempSensor.get_humidity(&hum);
+
+        if ( rfidReader.PICC_IsNewCardPresent())
+            if ( rfidReader.PICC_ReadCardSerial()) 
+            {
+                HttpRequest* post_req_rfid = new HttpRequest( network, HTTP_POST, "http://164.92.173.232:23552/api/sensor/data");
+                int piccType = rfidReader.PICC_GetType(rfidReader.uid.sak);
+                post_req_rfid->set_header("content-type", "application/json");
+                sprintf( body, "[{\"type\": \"RFID\", \"value\": \"%%02X:%02X:%02X:%02X\"}]", rfidReader.uid.uidByte[0], rfidReader.uid.uidByte[1], rfidReader.uid.uidByte[2], rfidReader.uid.uidByte[3]);
+                HttpResponse* post_res_rfid = post_req_rfid->send(body, strlen(body));
+                delete post_req_rfid;
+            }
+        thread_sleep_for( 200 );
 
         acc_gyro.get_event_status( &status );
         if  ( status.TapStatus ) {
