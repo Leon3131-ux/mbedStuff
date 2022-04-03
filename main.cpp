@@ -74,7 +74,7 @@ int main()
                 HttpRequest* post_req_rfid = new HttpRequest( network, HTTP_POST, "http://164.92.173.232:23552/api/sensor/data");
                 int piccType = rfidReader.PICC_GetType(rfidReader.uid.sak);
                 post_req_rfid->set_header("content-type", "application/json");
-                sprintf( body, "[{\"type\": \"RFID\", \"value\": \"%%02X:%02X:%02X:%02X\"}]", rfidReader.uid.uidByte[0], rfidReader.uid.uidByte[1], rfidReader.uid.uidByte[2], rfidReader.uid.uidByte[3]);
+                sprintf( body, "[{\"type\": \"RFID\", \"value\": \"%02X:%02X:%02X:%02X\"}]", rfidReader.uid.uidByte[0], rfidReader.uid.uidByte[1], rfidReader.uid.uidByte[2], rfidReader.uid.uidByte[3]);
                 HttpResponse* post_res_rfid = post_req_rfid->send(body, strlen(body));
                 delete post_req_rfid;
             }
