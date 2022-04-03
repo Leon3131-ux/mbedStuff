@@ -59,11 +59,11 @@ The backend is a simple [Spring Boot](https://spring.io/) server.
 The server has 1 endpoint which is: `/api/sensor/data` where it receives all the data from the mbed device. For more information on how the data is transmitted, please read [Data](#Data)
 
 When it receives the data, it sends each value out on a corresponding topic of the websocket. The following topics exist:
--`/topic/temp`
--`/topic/humidity`
--`/topic/gyro`
--`/topic/btnc`
--`/topic/rfid`
+- `/topic/temp`
+- `/topic/humidity`
+- `/topic/gyro`
+- `/topic/btnc`
+- `/topic/rfid`
 
 ## How to use
 Our application is easy to use, you just need to clone the repo to mbedstudio and change the mbed_app.json file to your wlan connection.
