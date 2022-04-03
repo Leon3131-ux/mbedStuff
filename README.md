@@ -230,8 +230,7 @@ The second thing was also with the http request. We had to specify the header to
 as the first problem, it was resolved after a talk with the teacher.
 
 ### What could I do better:
-Our idea for the project wasn't very innovative, we didn't want to do something too big, in case we have problems we can't finish it.
-I think it would be better to think of an idea and then add just a little bit more.
+Even though our idea wasn't very original we did quite a few things at the end, we use all sesnors so thats cool.
 
 ## Leon D.
 
