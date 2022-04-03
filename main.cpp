@@ -6,11 +6,15 @@
 #include <math.h>
 #include <LSM6DSLSensor.h>
 #include "http_request.h"
+#include "MFRC522.h"
+
 
 OLEDDisplay oled( MBED_CONF_IOTKIT_OLED_RST, MBED_CONF_IOTKIT_OLED_SDA, MBED_CONF_IOTKIT_OLED_SCL );
 DevI2C devI2c( MBED_CONF_IOTKIT_I2C_SDA, MBED_CONF_IOTKIT_I2C_SCL );
 HTS221Sensor tempSensor(&devI2c);
 DigitalIn button1( BUTTON1 );
+MFRC522 rfidReader( MBED_CONF_IOTKIT_RFID_MOSI, MBED_CONF_IOTKIT_RFID_MISO, MBED_CONF_IOTKIT_RFID_SCLK, MBED_CONF_IOTKIT_RFID_SS, MBED_CONF_IOTKIT_RFID_RST ); 
+
 
 static LSM6DSLSensor acc_gyro( &devI2c, LSM6DSL_ACC_GYRO_I2C_ADDRESS_LOW ); // low address
 uint16_t tap_count = 0;
@@ -24,6 +28,8 @@ int main()
     float hum;
     int button_count = 0;
     char body[2048];
+    rfidReader.PCD_Init();
+
 
 
     uint8_t id;
@@ -61,6 +67,18 @@ int main()
 
         tempSensor.get_temperature(&temp);
         tempSensor.get_humidity(&hum);
+
+        if ( rfidReader.PICC_IsNewCardPresent())
+            if ( rfidReader.PICC_ReadCardSerial()) 
+            {
+                HttpRequest* post_req_rfid = new HttpRequest( network, HTTP_POST, "http://164.92.173.232:23552/api/sensor/data");
+                int piccType = rfidReader.PICC_GetType(rfidReader.uid.sak);
+                post_req_rfid->set_header("content-type", "application/json");
+                sprintf( body, "[{\"type\": \"RFID\", \"value\": \"%%02X:%02X:%02X:%02X\"}]", rfidReader.uid.uidByte[0], rfidReader.uid.uidByte[1], rfidReader.uid.uidByte[2], rfidReader.uid.uidByte[3]);
+                HttpResponse* post_res_rfid = post_req_rfid->send(body, strlen(body));
+                delete post_req_rfid;
+            }
+        thread_sleep_for( 200 );
 
         acc_gyro.get_event_status( &status );
         if  ( status.TapStatus ) {
