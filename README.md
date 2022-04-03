@@ -48,11 +48,11 @@ The Github repo for the back- and frontend can be found here: https://github.com
 The frontend works by connecting to a websocket which is provided by the backend to receive its data.
 
 The following libraries were used to create the frontend:
--[Stomp](https://github.com/stomp-js/stompjs)
--[SockJS](https://github.com/sockjs/sockjs-client)
--[JQuery](https://jquery.com)
--[Bootstrap](https://getbootstrap.com/)
--[ChartJS](https://www.chartjs.org/)
+- [Stomp](https://github.com/stomp-js/stompjs)
+- [SockJS](https://github.com/sockjs/sockjs-client)
+- [JQuery](https://jquery.com)
+- [Bootstrap](https://getbootstrap.com/)
+- [ChartJS](https://www.chartjs.org/)
 
 ### Backend
 The backend is a simple [Spring Boot](https://spring.io/) server.
