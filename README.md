@@ -298,6 +298,8 @@ I once already worked with arduino but some things were different.
 In the module I learned how to use multiple sensors and get data from the environment and one of the most important things
 in my opinion how to send the data to the frontend via http requests, one thing is to get the data and the other to send it.
 
+I learned about the mqtt and how to publish topics, I also learned how to receive data from the mqtt server and display it on the IOTKIT
+
 ### Blocking points:
 Everything went fairly smoothly, at the start we hadn't had any major problems, we just had to ask the internet a few times
 for help, but those were little things.
