@@ -3,16 +3,14 @@
 In this documentation you are going to learn about our idea, how we did it and our thoughts.
 ![image](img/idea.png)
 
-## Idea
+## Idea and Flow
 
-In M242 our goal is to learn about microchips, IoT and how to use the IoTKit V3.
-
-Both team members hadn't had any major experience with this tool, so we learned alot of new things.
-For LB02 we've decided to make something simple, but to use as many sensors as possible to learn about them.
-
-Through the different repos offered by the teacher we grew our knowledge and tested new things.
-
-Our idea was to read some data from some sensors and send it through the wlan to the backend, there the data is processed and later the data points are visualised.
+The Mbed-Device should send its sensor data (temparature, humidity, button clicks and gyro taps) every second to the ActiveMQ broker.  
+The ActiveMQ broker will then forward that data using JMS to the Spring-Boot backend.  
+Once the backend has received the data, it will be processed and forwarded to the frontend via a Websocket.  
+The frontend can control motor attached to the Mbed-Device. It can also set the text that is displayed on the Mbed's display.  
+Once the user has set the desired text for example, the frontend will send an HTTP-Post request to the backend.  
+The backend then forwards that request to the broker via JMS which in turn forwards it to the Mbed-Device via MQTT.  
 
 ## Sensors
 
@@ -36,15 +34,46 @@ We use the onboard btn to count the taps.
 ### OLEDDisplay
 The Iotkit also has a display, we use it to show the data we're getting.
 
+### MFRC522
+This sensor is used to read the RFID and NFC tags.
+
 ## Systems
 
 We use both frontend and backend, even if the frontend isn't that sophisticated.
+The Github repo for the back- and frontend can be found here: https://github.com/Leon3131-ux/mbedCloud
 
 ### Frontend
-We use html for the frontend, we also have JS that allows us to make graphs and diagrams for the datapoints.
+The frontend works by connecting to a websocket which is provided by the backend to receive its data.
+
+The following libraries were used to create the frontend:
+- [Stomp](https://github.com/stomp-js/stompjs)
+- [SockJS](https://github.com/sockjs/sockjs-client)
+- [JQuery](https://jquery.com)
+- [Bootstrap](https://getbootstrap.com/)
+- [ChartJS](https://www.chartjs.org/)
 
 ### Backend
-In the backend we use springboot, our server runs on a docker container.
+The backend is a simple [Spring Boot](https://spring.io/) server.
+It receives data via JMS from the ActiveMQ broker. The broker receives data through from the Mbed-Device throughthe following topics:
+- `/iotkit/temp`
+- `/iotkit/humidity`
+- `/iotkit/gyro`
+- `/iotkit/button`
+- `/iotkit/rfid`
+- `/iotkit/display`
+
+When it receives the data, it sends each value out on a corresponding topic of the websocket. The following topics exist:
+- `/topic/temp`
+- `/topic/humidity`
+- `/topic/gyro`
+- `/topic/button`
+- `/topic/rfid`
+
+It also has an endpoint for getting the display text from the frontend. The endpoint is named `/api/display`
+
+For more information on how data is transferred, please see: [Data](#Data)
+
+The broker that we use is an [ActiveMQ](https://activemq.apache.org/) broker.
 
 ## How to use
 Our application is easy to use, you just need to clone the repo to mbedstudio and change the mbed_app.json file to your wlan connection.
@@ -53,59 +82,36 @@ Our application is easy to use, you just need to clone the repo to mbedstudio an
 ![image](img/mbed_app_json.png)
 1. Change in wifi-ssid the value to your wlan name
 2. Change in wifi-password the value to your wlan password.
+3. Navigate to http://164.92.173.232:42352/allCharts/allCharts.html and you should see the data of your mbed device being displayed.
 
-That should be all that you have to change.
+If you want to host the back- and frontend for yourself, you will have to change the IP address for the backend accordingly.
 
-### Data
-There are 4 datapoints we are receiving, those are:
+![image](img/http_link.png)
+and
+![image](img/http_link2.png)
+
+The instructions on how to host the back- and frontend for yourself are in the corresponding [Repository](https://github.com/Leon3131-ux/mbedCloud)
+
+## Data
+There are 5 datapoints we are receiving, those are:
 
 - Temperature, datatype float
 - Humidity, datatype float
 - Buttonpress count, datatype integer
 - Beat gyro sensors count, datatype integer.
+- Current RFID and NFC UUID.
 
-We send this data every second once to the backend, the format looks like:
+The Mbed-Device sends temparature and humidity data once per second to the corresponding topic.The data is formatted as a simple string.
 
-    [
-        {
-            "type": "SENSOR_TYPE",
-            "value": "SENSOR_VALUE"
-        },
-        {
-            "type": "SENSOR_TYPE",
-            "value": "SENSOR_VALUE"
-        }
-    ]
-This is the template:
+    /iotkit/humidity: 44.5
+    
+The backend forwards the data in the same way it arrived to the websocket.
 
-When we send it, it looks like:
+When the frontend sets the display text it sends it in the following JSON format:
 
-    [
-        {
-            "type": "TEMP",
-            "value": "24.52"
-        },
-        {
-            "type": "HUM",
-            "value": "31.24"
-        },
-        {
-            "type": "BEATC",
-            "value": "1"
-        },
-        {
-            "type": "BTNC",
-            "value": "6"
-        }
-    ]
-
-If you want this data to be sent to your backend you have to change the http link:
-
-![image](img/http_link.png)
-
-
-### Backend and Frontend
-
+    {
+        "displayText": "whatever"
+    }
 
 ### Https
 In this project we didn't use https, currently this is only running with http.
@@ -182,6 +188,10 @@ to
 
 # Reflexion
 
+## How we split up the work
+Stefan did most of the work with mbed itself while Leon wrote the back- and frontend.
+Leon also helped Stefan with some parts of the mbed program.
+
 ## Stefan A.
 
 ### What did I learn:
@@ -194,7 +204,7 @@ in my opinion how to send the data to the frontend via http requests, one thing 
 ### Blocking points:
 Everything went fairly smoothly, at the start we hadn't had any major problems, we just had to ask the internet a few times
 for help, but those were little things.
-The Problems began to pill up when we tried to use the http library and to send the data to the backend. The library used 
+The Problems began to pile up when we tried to use the http library and to send the data to the backend. The library used 
 on the examples wasn't the same as the official, it might just be that the versioning was wrong. 
 
 It took some time to figure out what's wrong and after a talk with the teacher the problem was resolved.
@@ -203,13 +213,17 @@ The second thing was also with the http request. We had to specify the header to
 as the first problem, it was resolved after a talk with the teacher.
 
 ### What could I do better:
-Our idea for the project wasn't very innovative, we didn't want to do something too big, in case we have problems we can't finish it.
-I think it would be better to think of an idea and then add just a little bit more.
+Even though our idea wasn't very original we did quite a few things at the end, we use all sesnors so thats cool.
 
 ## Leon D.
 
 ### What did I learn:
+I learned about the MQTT and AMQP protocls.
+Neither were all that new to me tough because they are similar to the Websocket protocol.
 
 ### Blocking points:
+I didn't have any major blocking points. There were some issues with getting the ActiveMQ broker to run and to get the Spring-Backend connected via JMS but once I passed those hurdles, everything went smoothly.
 
 ### What could I do better:
+I don't think there's anything we really need to improve. We used 4 different protocols in total whice I think is quite the achievement.  
+We could have used HTTPS for a secure connection between the front- and backend but that would've taken too much time with the SSL certificate and so on.

@@ -170,11 +170,13 @@ int main()
                 
                 // Print Card type
                 int piccType = rfidReader.PICC_GetType(rfidReader.uid.sak);
+
                 printf("PICC Type: %s \n", rfidReader.PICC_GetTypeName(piccType) );
                 
                 sprintf( buf, "%02X:%02X:%02X:%02X:", rfidReader.uid.uidByte[0], rfidReader.uid.uidByte[1], rfidReader.uid.uidByte[2], rfidReader.uid.uidByte[3] );
                 publish( mqttNetwork, client, topicRFID );                
                 
+
             }
 
         acc_gyro.get_event_status( &status );
