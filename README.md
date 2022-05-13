@@ -216,17 +216,12 @@ Even though our idea wasn't very original we did quite a few things at the end, 
 ## Leon D.
 
 ### What did I learn:
-I haven't had any experience with embedded systems or C++ before this module. 
-It was very interesting seeing how these types of systems worked and were programmed
+I learned about the MQTT and AMQP protocls.
+Neither were all that new to me tough because they are similar to the Websocket protocol.
 
 ### Blocking points:
-I mainly do fullstack development at my company. This means that everything I want to do has either been done before 
-or the API that I need to use is well documented.
-
-This isn't the case with mbed. All the documentation is all over the place and trying to figure out how to get something to work takes time.
-That was my biggest issue when I started to look at mbed code.
-
-I can now do things with the limited documentation that is available. It also took some time to figure out C++ since I've never worked with it before.
+I didn't have any major blocking points. There were some issues with getting the ActiveMQ broker to run and to get the Spring-Backend connected via JMS but once I passed those hurdles, everything went smoothly.
 
 ### What could I do better:
-I'm very happy with the result of our project. My main goal was to look at as many sensors as possible which is what we achieved. I'm also very happy with how the frontend turned out. I don't think that there's anything to improve.
+I don't think there's anything we really need to improve. We used 4 different protocols in total whice I think is quite the achievement.  
+We could have used HTTPS for a secure connection between the front- and backend but that would've taken too much time with the SSL certificate and so on.
