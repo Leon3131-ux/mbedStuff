@@ -5,12 +5,12 @@ In this documentation you are going to learn about our idea, how we did it and o
 
 ## Idea and Flow
 
-The Mbed-Device should send its sensor data (temparature, humidity, button clicks and gyro taps) every second to the ActiveMQ broker.
-The ActiveMQ broker will then forward that data using JMS to the Spring-Boot backend.
-Once the backend has received the data, it will be processed and forwarded to the frontend via a Websocket.
-The frontend can control motor attached to the Mbed-Device. It can also set the text that is displayed on the Mbed's display.
-Once the user has set the desired text for example, the frontend will send an HTTP-Post request to the backend.
-The backend then forwards that request to the broker via JMS which in turn forwards it to the Mbed-Device via MQTT.
+The Mbed-Device should send its sensor data (temparature, humidity, button clicks and gyro taps) every second to the ActiveMQ broker.  
+The ActiveMQ broker will then forward that data using JMS to the Spring-Boot backend.  
+Once the backend has received the data, it will be processed and forwarded to the frontend via a Websocket.  
+The frontend can control motor attached to the Mbed-Device. It can also set the text that is displayed on the Mbed's display.  
+Once the user has set the desired text for example, the frontend will send an HTTP-Post request to the backend.  
+The backend then forwards that request to the broker via JMS which in turn forwards it to the Mbed-Device via MQTT.  
 
 ## Sensors
 
