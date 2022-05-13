@@ -76,6 +76,104 @@ For more information on how data is transferred, please see: [Data](#Data)
 
 The broker that we use is an [ActiveMQ](https://activemq.apache.org/) broker.
 
+## MQTT
+
+For the MQTT the code looks much different then the HTTPS.
+From a practical view, using MQTT for our project doesn't make any sense, but we did it anyway.
+
+First we had to import the package from the mqtt example.
+
+For the first code change was to add the Topics.
+
+Same as in the example main from the mqtt repo.
+
+In our case it looks like this:
+
+        // Topic's publish
+        char* topicTEMP = (char*) "iotkit/sensor";
+        char* topicBUTTON = (char*) "iotkit/button";
+        char* topicGYRO = (char*) "iotkit/gyro";
+        char* topicRFID = (char*) "iotkit/rfid";
+        char* topicENCODER = (char*) "iotkit/encoder";
+        // Topic's subscribe
+        char* topicActors = (char*) "iotkit/actors/#";
+        // MQTT Brocker
+        char* hostname = (char*) "164.92.173.232";
+        int port = 1883; 
+
+The topic name should make sense, so for our sensors we use TEMP, BUTTON, GYRO, RFID and ENCODER.
+
+For the actors, we can just call it Actors.
+
+The most important thing to change is the hostname.
+
+The hostname should be the domain name of the server you are using, for us its a IP Address since we use a local host setup from a laptop.
+
+Now 2 more functions have to be added.
+
+Those are func publish and f
+unc messageArrived.
+
+        void publish( MQTTNetwork &mqttNetwork, MQTT::Client<MQTTNetwork, Countdown> &client, char* topic )
+        {
+            MQTT::Message message;    
+            message.qos = MQTT::QOS0;
+            message.retained = false;
+            message.dup = false;
+            message.payload = (void*) buf;
+            message.payloadlen = strlen(buf)+1;
+            client.publish( topic, message);  
+        }  
+
+The publish function sends the data that is put into the parameters to the messaging Server, then the data is sent even further to the backend.
+
+The second function is messageArrived. We use this to get things from the MQTT Broker to use if needed.
+
+        void messageArrived( MQTT::MessageData& md )
+        {
+            float value;
+            MQTT::Message &message = md.message;
+            printf("Message arrived: qos %d, retained %d, dup %d, packetid %d\n", message.qos, message.retained, message.dup, message.id);
+            printf("Topic %.*s, ", md.topicName.lenstring.len, (char*) md.topicName.lenstring.data );
+            // MQTT schickt kein \0, deshalb manuell anfuegen
+            ((char*) message.payload)[message.payloadlen] = '\0';
+            printf("Payload %s\n", (char*) message.payload);
+
+            // Aktoren
+            if  ( strncmp( (char*) md.topicName.lenstring.data + md.topicName.lenstring.len - 6, "servo2", 6) == 0 )
+            {
+                sscanf( (char*) message.payload, "%f", &value );
+            }               
+        }
+
+The last changes we need to do, is to call the publish function with the correct parameters and the correct topics.
+
+This is really easy, you just have to call the function after getting the data from the sensor.
+
+Here is one example from our code, with the hum and temp sensor
+
+        publish( mqttNetwork, client, topicTEMP );
+
+The last thing is to close the connection.
+
+This is done with this code:
+
+        
+        #ifdef TARGET_K64F
+
+        encoder = wheel.getPulses();
+        sprintf( buf, "%d", encoder );
+        publish( mqttNetwork, client, topicENCODER );
+        #endif
+
+        client.yield    ( 1000 );                  
+        thread_sleep_for( 500 );
+        }
+        if ((rc = client.disconnect()) != 0)
+            printf("rc from disconnect was %d\r\n", rc);
+
+        mqttNetwork.disconnect();
+
 ## How to use
 Our application is easy to use, you just need to clone the repo to mbedstudio and change the mbed_app.json file to your wlan connection.
 
