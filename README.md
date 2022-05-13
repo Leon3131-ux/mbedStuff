@@ -71,7 +71,7 @@ When it receives the data, it sends each value out on a corresponding topic of t
 
 It also has an endpoint for getting the display text from the frontend. The endpoint is named `/api/display`
 
-For more information on how data is transferred, please see: [Data](Data)
+For more information on how data is transferred, please see: [Data]("#Data")
 
 ## How to use
 Our application is easy to use, you just need to clone the repo to mbedstudio and change the mbed_app.json file to your wlan connection.
