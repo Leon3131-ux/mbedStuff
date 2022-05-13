@@ -73,6 +73,8 @@ It also has an endpoint for getting the display text from the frontend. The endp
 
 For more information on how data is transferred, please see: [Data](#Data)
 
+The broker that we use is an [ActiveMQ](https://activemq.apache.org/) broker.
+
 ## How to use
 Our application is easy to use, you just need to clone the repo to mbedstudio and change the mbed_app.json file to your wlan connection.
 
