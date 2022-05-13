@@ -1,7 +1,7 @@
 # Documentation Mbedstuff
 
 In this documentation you are going to learn about our idea, how we did it and our thoughts.
-![image](img/idea.png)
+![image](img/mbedFlow.png)
 
 ## Idea and Flow
 
