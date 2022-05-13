@@ -26,21 +26,19 @@ QEI wheel (MBED_CONF_IOTKIT_BUTTON2, MBED_CONF_IOTKIT_BUTTON3, NC, 624);
 
 // Topic's publish
 char* topicTEMP = (char*) "iotkit/temp";
-char* topicHUM = (char*) "iotkit/hum";
+char* topicHUM = (char*) "iotkit/humidity";
 char* topicBUTTON = (char*) "iotkit/button";
 char* topicGYRO = (char*) "iotkit/gyro";
 char* topicRFID = (char*) "iotkit/rfid";
-char* topicPrint = (char*) "iotkit/print";
-
 // Topic's subscribe
-char* topicActors = (char*) "iotkit/actors/#";
+char* topicActors = (char*) "iotkit/display";
 // MQTT Brocker
 char* hostname = (char*) "164.92.173.232";
 int port = 1883;
 // MQTT Message
 MQTT::Message message;
 // I/O Buffer
-char buf[1000];
+char buf[100];
 
 // Klassifikation 
 char cls[3][10] = { "low", "middle", "high" };
@@ -72,7 +70,7 @@ void publish( MQTTNetwork &mqttNetwork, MQTT::Client<MQTTNetwork, Countdown> &cl
 /** Daten empfangen von MQTT Broker */
 void messageArrived( MQTT::MessageData& md )
 {
-    float value;
+    string value;
     MQTT::Message &message = md.message;
     printf("Message arrived: qos %d, retained %d, dup %d, packetid %d\n", message.qos, message.retained, message.dup, message.id);
     printf("Topic %.*s, ", md.topicName.lenstring.len, (char*) md.topicName.lenstring.data );
@@ -81,9 +79,13 @@ void messageArrived( MQTT::MessageData& md )
     printf("Payload %s\n", (char*) message.payload);
 
     // Aktoren
-    if  ( strncmp( (char*) md.topicName.lenstring.data + md.topicName.lenstring.len - 6, "servo2", 6) == 0 )
+    if  ( strncmp( (char*) md.topicName.lenstring.data + md.topicName.lenstring.len - 7 , "display", 7) == 0 )
     {
-        sscanf( (char*) message.payload, "%f", &value );
+        sscanf( (char*) message.payload, "%s*", &value );
+        printf( "Display %s\n", &value );
+        oled.clear();
+        oled.printf("%s", &value);
+        thread_sleep_for( 10000 );
     }               
 }
 
@@ -95,6 +97,7 @@ int main()
     float hum;
     int button_count = 0;
     int encoder;
+    string display;
     rfidReader.PCD_Init();
 
     uint8_t id;
@@ -178,33 +181,26 @@ int main()
         if  ( status.TapStatus ) {
             tap_count++;
             oled.cursor( 1, 0 );
-            printf(buf, "%6d", tap_count);
-            sprintf(buf, "%6d", tap_count);
+            printf(buf, "%d", tap_count);
+            sprintf(buf, "%d", tap_count);
             publish( mqttNetwork, client, topicGYRO );
-        }
+        } 
 
-
-        while ( true ) {
-            sprintf(buf, "Work Work aass");
-            publish( mqttNetwork, client, topicPrint );
-        }
         
         if  ( button1 == 0 ) 
         {
             button_count++;
             printf( "BTN %6d\n", button_count );
-            sprintf(buf, "%6d", button_count);
+            sprintf(buf, "%d", button_count);
             publish( mqttNetwork, client, topicBUTTON );
-        }
-        
+        }       
+
         oled.clear();
         oled.printf("current temp: %.2f\ncurrent hum: %.2f\nCurrent tap: %i\nCurrent btn count: %i", temp, hum, tap_count, button_count);
+        
 
-        client.yield    ( 1000 );                   // MQTT Client darf empfangen
+        client.yield    ( 100 );                   
         thread_sleep_for( 500 );
     }
-    if ((rc = client.disconnect()) != 0)
-        printf("rc from disconnect was %d\r\n", rc);
 
-    mqttNetwork.disconnect();  
 }
