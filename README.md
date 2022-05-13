@@ -90,13 +90,14 @@ Same as in the example main from the mqtt repo.
 In our case it looks like this:
 
         // Topic's publish
-        char* topicTEMP = (char*) "iotkit/sensor";
+        char* topicTEMP = (char*) "iotkit/temp";
+        char* topicHUM = (char*) "iotkit/humidity";
         char* topicBUTTON = (char*) "iotkit/button";
         char* topicGYRO = (char*) "iotkit/gyro";
         char* topicRFID = (char*) "iotkit/rfid";
         char* topicENCODER = (char*) "iotkit/encoder";
         // Topic's subscribe
-        char* topicActors = (char*) "iotkit/actors/#";
+        char* topicActors = (char*) "iotkit/display";
         // MQTT Brocker
         char* hostname = (char*) "164.92.173.232";
         int port = 1883; 
@@ -131,7 +132,7 @@ The second function is messageArrived. We use this to get things from the MQTT B
 
         void messageArrived( MQTT::MessageData& md )
         {
-            float value;
+            string value;
             MQTT::Message &message = md.message;
             printf("Message arrived: qos %d, retained %d, dup %d, packetid %d\n", message.qos, message.retained, message.dup, message.id);
             printf("Topic %.*s, ", md.topicName.lenstring.len, (char*) md.topicName.lenstring.data );
@@ -140,11 +141,15 @@ The second function is messageArrived. We use this to get things from the MQTT B
             printf("Payload %s\n", (char*) message.payload);
 
             // Aktoren
-            if  ( strncmp( (char*) md.topicName.lenstring.data + md.topicName.lenstring.len - 6, "servo2", 6) == 0 )
+            if  ( strncmp( (char*) md.topicName.lenstring.data + md.topicName.lenstring.len - 7 , "display", 7) == 0 )
             {
-                sscanf( (char*) message.payload, "%f", &value );
-            }               
-        }
+                sscanf( (char*) message.payload, "%s*", &value );
+            printf( "Display %s\n", &value );
+                    oled.clear();
+                oled.printf("%s", &value);
+            thread_sleep_for( 10000 );
+        }               
+    }
 
 The last changes we need to do, is to call the publish function with the correct parameters and the correct topics.
 
@@ -158,13 +163,6 @@ The last thing is to close the connection.
 
 This is done with this code:
 
-        
-        #ifdef TARGET_K64F
-
-        encoder = wheel.getPulses();
-        sprintf( buf, "%d", encoder );
-        publish( mqttNetwork, client, topicENCODER );
-        #endif
 
         client.yield    ( 1000 );                  
         thread_sleep_for( 500 );
