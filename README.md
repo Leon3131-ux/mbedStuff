@@ -1,9 +1,10 @@
 # Documentation Mbedstuff
 
 In this documentation you are going to learn about our idea, how we did it and our thoughts.
-![image](img/mqttFlow.png)
+
 
 ## Idea and Flow
+![image](img/mqttFlow.png)
 
 The Mbed-Device should send its sensor data (temparature, humidity, button clicks and gyro taps) every second to the ActiveMQ broker.  
 The ActiveMQ broker will then forward that data using JMS to the Spring-Boot backend.  
