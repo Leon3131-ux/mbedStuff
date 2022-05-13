@@ -89,44 +89,17 @@ There are 5 datapoints we are receiving, those are:
 - Beat gyro sensors count, datatype integer.
 - Current RFID and NFC UUID.
 
-We send this data every second once to the backend, the format looks like:
+The Mbed-Device sends temparature and humidity data once per second to the corresponding topic.The data is formatted as a simple string.
 
-    [
-        {
-            "type": "SENSOR_TYPE",
-            "value": "SENSOR_VALUE"
-        },
-        {
-            "type": "SENSOR_TYPE",
-            "value": "SENSOR_VALUE"
-        }
-    ]
-This is the template:
+    /iotkit/humidity: 44.5
+    
+The backend forwards the data in the same way it arrived to the websocket.
 
-When we send it, it looks like:
+When the frontend sets the display text it sends it in the following JSON format:
 
-    [
-        {
-            "type": "TEMP",
-            "value": "24.52"
-        },
-        {
-            "type": "HUM",
-            "value": "31.24"
-        },
-        {
-            "type": "BEATC",
-            "value": "1"
-        },
-        {
-            "type": "BTNC",
-            "value": "6"
-        },
-        {
-            "type": "RFID",
-            "value: "02:3F:A4:79"
-        }
-    ]
+    {
+        "displayText": "whatever"
+    }
 
 ### Https
 In this project we didn't use https, currently this is only running with http.
