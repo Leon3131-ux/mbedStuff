@@ -54,14 +54,24 @@ The following libraries were used to create the frontend:
 
 ### Backend
 The backend is a simple [Spring Boot](https://spring.io/) server.
-The server has 1 endpoint which is: `/api/sensor/data` where it receives all the data from the mbed device. For more information on how the data is transmitted, please read [Data](#Data)
+It receives data via JMS from the ActiveMQ broker. The broker receives data through from the Mbed-Device throughthe following topics:
+- `/iotkit/temp`
+- `/iotkit/humidity`
+- `/iotkit/gyro`
+- `/iotkit/button`
+- `/iotkit/rfid`
+- `/iotkit/display`
 
 When it receives the data, it sends each value out on a corresponding topic of the websocket. The following topics exist:
 - `/topic/temp`
 - `/topic/humidity`
 - `/topic/gyro`
-- `/topic/btnc`
+- `/topic/button`
 - `/topic/rfid`
+
+It also has an endpoint for getting the display text from the frontend. The endpoint is named `/api/display`
+
+For more information on how data is transferred, please see: (Data)[Data]
 
 ## How to use
 Our application is easy to use, you just need to clone the repo to mbedstudio and change the mbed_app.json file to your wlan connection.
