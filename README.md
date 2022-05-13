@@ -3,16 +3,14 @@
 In this documentation you are going to learn about our idea, how we did it and our thoughts.
 ![image](img/idea.png)
 
-## Idea
+## Idea and Flow
 
-In M242 our goal is to learn about microchips, IoT and how to use the IoTKit V3.
-
-Both team members hadn't had any major experience with this tool, so we learned alot of new things.
-For LB02 we've decided to make something simple, but to use as many sensors as possible to learn about them.
-
-Through the different repos offered by the teacher we grew our knowledge and tested new things.
-
-Our idea was to read some data from some sensors and send it through the wlan to the backend, there the data is processed and later the data points are visualised.
+The Mbed-Device should send its sensor data (temparature, humidity, button clicks and gyro taps) every second to the ActiveMQ broker.
+The ActiveMQ broker will then forward that data using JMS to the Spring-Boot backend.
+Once the backend has received the data, it will be processed and forwarded to the frontend via a Websocket.
+The frontend can control motor attached to the Mbed-Device. It can also set the text that is displayed on the Mbed's display.
+Once the user has set the desired text for example, the frontend will send an HTTP-Post request to the backend.
+The backend then forwards that request to the broker via JMS which in turn forwards it to the Mbed-Device via MQTT.
 
 ## Sensors
 
